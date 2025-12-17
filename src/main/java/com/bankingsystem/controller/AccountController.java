@@ -7,6 +7,11 @@ import com.bankingsystem.dto.TransferRequest;
 import com.bankingsystem.entity.Account;
 import com.bankingsystem.entity.BillPayment;
 import com.bankingsystem.entity.Transaction;
+import com.bankingsystem.entity.User;
+import com.bankingsystem.repository.AccountRepository;
+import com.bankingsystem.repository.BillPaymentRepository;
+import com.bankingsystem.repository.TransactionRepository;
+import com.bankingsystem.repository.UserRepository;
 import com.bankingsystem.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -20,14 +25,40 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/accounts")
 public class AccountController {
-
     @Autowired
     private AccountService accountService;
 
-    @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody AccountRequest request) {
-        return ResponseEntity.ok(accountService.createAccount(request));
-    }
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    BillPaymentRepository billPaymentRepository;
+
+//    @PostMapping
+//    public ResponseEntity<Account> createAccount(@RequestBody AccountRequest request) {
+//        return ResponseEntity.ok(accountService.createAccount(request));
+//    }
+@PostMapping
+public ResponseEntity<Account> createAccount(@RequestBody AccountRequest request) {
+    User user = userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    Account account = new Account();
+    account.setAccountNumber(request.getAccountNumber());
+    //  account.setBalance(request.getBalance());
+    account.setType(request.getType());
+    account.setBalance(request.getBalance()); //*change
+    account.setUser(user);
+
+    return ResponseEntity.ok(accountRepository.save(account));
+}
+
 
     @PostMapping("/transfer")
     public ResponseEntity<String> transferFunds(@RequestBody TransferRequest request) {

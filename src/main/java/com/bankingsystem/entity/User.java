@@ -1,5 +1,6 @@
 package com.bankingsystem.entity;
 
+import com.bankingsystem.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,13 +12,22 @@ import java.util.Set;
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
-    private String password;
-    private String role;
 
-    private boolean active = true; // ✅ Default active
+    @Column(nullable = false, unique = true, length = 50)
+    private String email;
 
+    @Column(nullable = false)
+    private String password; // BCrypt hash
 
-    @OneToMany(mappedBy = "user")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role; // CUSTOMER, BANKER, ADMIN
+
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Account> accounts;
 }
